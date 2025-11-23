@@ -3,90 +3,576 @@
 <head>
   <meta charset="UTF-8">
   <title>Game Day Program | Fort Saskatchewan Rangers</title>
-
-  <!-- Instant redirect to your Apps Script web app -->
-  <meta http-equiv="refresh"
-        content="0; URL='https://script.google.com/macros/s/AKfycbwgs6tc24eSHUJJyis-vqxtBTeDRNCQylis_K5zrgKaEBeiYW9vaactc3kHN7qGSeXF/exec'">
-
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <style>
-    html, body {
+    :root {
+      --bg: #020617;
+      --panel: #020617;
+      --panel-soft: #0b1120;
+      --accent: #dc2626;
+      --accent-soft: #fecaca;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --border-subtle: rgba(148, 163, 184, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
       margin: 0;
-      padding: 0;
-      height: 100%;
+      min-height: 100vh;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #1f2937 0, #020617 50%, #000 100%);
-      color: #e5e7eb;
+      background: radial-gradient(circle at top, #1f2937 0, #020617 55%, #000 100%);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 1100px;
+      background: rgba(15, 23, 42, 0.95);
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.85),
+        0 0 0 1px rgba(15, 23, 42, 0.9);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    @media (min-width: 900px) {
+      .page {
+        padding: 20px 24px 24px;
+      }
+    }
+
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 12px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex: 1;
+    }
+
+    .logo-badge {
+      width: 56px;
+      height: 56px;
+      border-radius: 999px;
+      border: 2px solid rgba(248, 250, 252, 0.4);
       display: flex;
       align-items: center;
       justify-content: center;
-      text-align: center;
+      overflow: hidden;
+      background: #020617;
     }
-    .card {
-      border: 1px solid rgba(248, 250, 252, 0.08);
-      border-radius: 18px;
-      padding: 24px 20px;
-      max-width: 480px;
-      width: 90%;
-      box-shadow:
-        0 20px 40px rgba(0, 0, 0, 0.7),
-        0 0 0 1px rgba(15, 23, 42, 0.9);
-      background: radial-gradient(circle at top left, rgba(248, 250, 252, 0.06) 0, rgba(15, 23, 42, 0.98) 45%, #020617 100%);
+
+    .logo-badge img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
     }
-    .badge {
+
+    .title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .league-pill {
       display: inline-flex;
       align-items: center;
       gap: 6px;
       font-size: 11px;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
       padding: 4px 10px;
       border-radius: 999px;
-      border: 1px solid rgba(248, 250, 252, 0.16);
-      margin-bottom: 10px;
-      color: #9ca3af;
+      border: 1px solid rgba(148, 163, 184, 0.8);
+      color: var(--text-muted);
     }
-    .title {
+
+    .title-main {
       font-family: "Oswald", system-ui, sans-serif;
       font-size: 22px;
-      letter-spacing: 0.2em;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
-      margin-bottom: 4px;
     }
+
     .subtitle {
       font-size: 13px;
-      color: #d1d5db;
-      margin-bottom: 16px;
+      color: var(--text-muted);
     }
-    .spinner {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      border: 3px solid rgba(248, 250, 252, 0.12);
-      border-top-color: #facc15;
-      animation: spin 0.9s linear infinite;
-      margin: 0 auto 12px;
+
+    .header-right {
+      text-align: right;
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 140px;
     }
-    .small {
+
+    .matchup-line {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-soft);
+    }
+
+    .game-meta {
+      font-size: 13px;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 800px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.9) 0, #020617 55%, #020617 100%);
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      padding: 10px 12px;
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.6);
+    }
+
+    .panel h2 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid rgba(75, 85, 99, 0.8);
+      padding-bottom: 4px;
+    }
+
+    .panel h2 span {
+      color: var(--accent-soft);
+    }
+
+    .roster-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    @media (max-width: 800px) {
+      .roster-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    th, td {
+      padding: 4px 6px;
+      text-align: left;
+      border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+    }
+
+    th {
       font-size: 11px;
-      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+    }
+
+    tbody tr:nth-child(even) {
+      background: rgba(15, 23, 42, 0.65);
+    }
+
+    .num-col {
+      width: 40px;
+    }
+
+    .pos-col {
+      width: 50px;
+    }
+
+    .name-col {
+      width: auto;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .sponsors-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 8px;
+    }
+
+    .sponsor-card {
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      padding: 8px;
+      text-align: center;
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.9) 0, #020617 100%);
+    }
+
+    .sponsor-card img {
+      max-width: 100%;
+      max-height: 40px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto 6px;
+    }
+
+    .sponsor-card-name {
+      font-size: 11px;
+      color: var(--text-main);
+    }
+
+    .next-game-box {
+      font-size: 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(248, 250, 252, 0.14);
+      padding: 8px 9px;
+      background: radial-gradient(circle at top right, rgba(248, 250, 252, 0.08) 0, rgba(15, 23, 42, 0.95) 45%, #020617 100%);
       margin-top: 8px;
     }
+
+    .next-game-label {
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .next-game-main {
+      font-size: 13px;
+    }
+
+    .status-line {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .status-line-ok {
+      color: #22c55e;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      border: 2px solid rgba(148, 163, 184, 0.4);
+      border-top-color: #facc15;
+      animation: spin 0.8s linear infinite;
+      vertical-align: middle;
+      margin-right: 4px;
+    }
+
     @keyframes spin {
       to { transform: rotate(360deg); }
+    }
+
+    footer {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: right;
+      border-top: 1px solid rgba(31, 41, 55, 0.8);
+      padding-top: 6px;
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <div class="badge">
-      <span>Fort Saskatchewan Rangers</span>
-    </div>
-    <div class="spinner"></div>
-    <div class="title">Game Day Program</div>
-    <div class="subtitle">Loading tonight&apos;s lineup and sponsor info…</div>
-    <div class="small">If nothing happens, <a href="https://script.google.com/macros/s/AKfycbwgs6tc24eSHUJJyis-vqxtBTeDRNCQylis_K5zrgKaEBeiYW9vaactc3kHN7qGSeXF/exec" style="color:#fbbf24; text-decoration:underline;">tap here</a>.</div>
+  <div class="page">
+    <header>
+      <div class="header-left">
+        <div class="logo-badge">
+          <img id="homeLogo" src="" alt="Home logo" />
+        </div>
+        <div class="title-block">
+          <div class="league-pill">
+            <span id="leagueName">League</span>
+          </div>
+          <div class="title-main" id="matchupTitle">Rangers vs Opponent</div>
+          <div class="subtitle" id="gameSubtitle">Date • Time • Arena</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="matchup-line" id="matchupLine">GAME DAY PROGRAM</div>
+        <div class="game-meta" id="gameMeta"></div>
+        <div class="status-line" id="statusLine">
+          <span class="spinner"></span>Contacting server…
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="panel">
+        <h2><span>Rangers</span> Roster</h2>
+        <div class="roster-grid">
+          <div>
+            <table>
+              <thead>
+                <tr>
+                  <th class="num-col">#</th>
+                  <th class="name-col">Player</th>
+                  <th class="pos-col">Pos</th>
+                </tr>
+              </thead>
+              <tbody id="rangersRosterBody">
+                <tr><td colspan="3">Loading roster…</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <table>
+              <thead>
+                <tr>
+                  <th class="num-col">#</th>
+                  <th class="name-col">Opponent</th>
+                  <th class="pos-col">Pos</th>
+                </tr>
+              </thead>
+              <tbody id="opponentRosterBody">
+                <tr><td colspan="3">Loading opponent…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2><span>Main</span> Sponsor</h2>
+        <div class="badge">Presented by</div>
+        <div class="sponsor-card" id="mainSponsorCard">
+          <img id="mainSponsorLogo" src="" alt="Main sponsor logo">
+          <div class="sponsor-card-name" id="mainSponsorName">TBA</div>
+        </div>
+
+        <div class="next-game-box">
+          <div class="next-game-label">Next Home Game</div>
+          <div class="next-game-main" id="nextGameInfo">TBA</div>
+        </div>
+
+        <div style="margin-top:10px;">
+          <h2><span>Supporting</span> Sponsors</h2>
+          <div class="sponsors-grid" id="sponsorsGrid">
+            <div class="sponsor-card">
+              <div class="sponsor-card-name">Loading sponsors…</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Live lineup &amp; sponsor info • Fort Saskatchewan Rangers
+    </footer>
   </div>
+
+  <script>
+    // 👉 IMPORTANT: use your real web app URL + ?format=json
+    const API_URL = "https://script.google.com/macros/s/AKfycbwgs6tc24eSHUJJyis-vqxtBTeDRNCQylis_K5zrgKaEBeiYW9vaactc3kHN7qGSeXF/exec?format=json";
+
+    async function loadGameData() {
+      const statusEl = document.getElementById("statusLine");
+      try {
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const data = await res.json();
+        renderGameProgram(data);
+        statusEl.textContent = "Live data from your Google Sheet ✔";
+        statusEl.classList.add("status-line-ok");
+      } catch (err) {
+        console.error("Error loading game data:", err);
+        statusEl.textContent = "Could not load data (check Apps Script access & URL).";
+      }
+    }
+
+    function renderGameProgram(data) {
+      const homeTeam = data.homeTeam || "Home";
+      const gameInfo = data.gameInfo || {};
+      const nextGame = data.nextGame || null;
+
+      // ----- Header text -----
+      const opponent = gameInfo.opponent || "Opponent";
+      const date = toText(gameInfo.date);
+      const time = toText(gameInfo.time);
+      const arena = gameInfo.arena || "";
+
+      const gameMetaPieces = [date, time, arena].filter(Boolean);
+
+      document.getElementById("matchupTitle").textContent =
+        `${homeTeam} vs ${opponent}`;
+
+      document.getElementById("matchupLine").textContent =
+        `${homeTeam} vs ${opponent}`.toUpperCase();
+
+      document.getElementById("gameSubtitle").textContent =
+        gameMetaPieces.join(" • ") || "Game Day Program";
+
+      document.getElementById("gameMeta").textContent =
+        gameMetaPieces.join(" • ");
+
+      // League name line – we don't have a leagueName field, so just show a generic label
+      document.getElementById("leagueName").textContent = "RANGERS HOCKEY";
+
+      // ----- Logos -----
+      setImg("homeLogo", data.gameInfo && data.gameInfo.homeLogoUrl);
+      setImg("leagueLogo", data.gameInfo && data.gameInfo.leagueLogoUrl); // if you add an element later
+      setImg("opponentLogo", data.gameInfo && data.gameInfo.opponentLogoUrl); // if you add an element later
+
+      // ----- Rosters -----
+      renderRoster("rangersRosterBody", data.roster);
+      renderRoster("opponentRosterBody", data.opponentRoster);
+
+      // ----- Sponsors -----
+      if (data.sponsors && data.sponsors.main) {
+        document.getElementById("mainSponsorName").textContent =
+          data.sponsors.main.name || "Main Sponsor";
+        setImg("mainSponsorLogo", data.sponsors.main.logoUrl);
+      } else {
+        document.getElementById("mainSponsorName").textContent = "Main Sponsor";
+      }
+
+      if (data.sponsors && data.sponsors.others) {
+        renderSponsors("sponsorsGrid", data.sponsors.others);
+      }
+
+      // ----- Next Game -----
+      const nextGameEl = document.getElementById("nextGameInfo");
+      if (nextGame && (nextGame.opponent || nextGame.date || nextGame.time || nextGame.arena)) {
+        const ngPieces = [
+          nextGame.opponent || "TBD",
+          toText(nextGame.date),
+          toText(nextGame.time),
+          nextGame.arena || ""
+        ].filter(Boolean);
+        nextGameEl.textContent = ngPieces.join(" • ");
+      } else {
+        nextGameEl.textContent = "TBA";
+      }
+    }
+
+    function setImg(id, url) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (url) {
+        el.src = url;
+        el.style.display = "";
+      } else {
+        el.style.display = "none";
+      }
+    }
+
+    function renderRoster(tbodyId, players) {
+      const tbody = document.getElementById(tbodyId);
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      if (!players || !players.length) {
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+        td.colSpan = 3;
+        td.textContent = "No roster data found.";
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+      }
+
+      players.forEach(player => {
+        const tr = document.createElement("tr");
+
+        const tdNum = document.createElement("td");
+        tdNum.textContent = player.number || "";
+        tr.appendChild(tdNum);
+
+        const tdName = document.createElement("td");
+        tdName.textContent = player.name || "";
+        tr.appendChild(tdName);
+
+        const tdPos = document.createElement("td");
+        tdPos.textContent = player.position || "";
+        tr.appendChild(tdPos);
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderSponsors(containerId, sponsors) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = "";
+
+      if (!sponsors || !sponsors.length) {
+        const div = document.createElement("div");
+        div.className = "sponsor-card";
+        div.innerHTML = '<div class="sponsor-card-name">No additional sponsors listed.</div>';
+        container.appendChild(div);
+        return;
+      }
+
+      sponsors.forEach(s => {
+        const div = document.createElement("div");
+        div.className = "sponsor-card";
+
+        if (s.logoUrl) {
+          const img = document.createElement("img");
+          img.src = s.logoUrl;
+          img.alt = s.name || "Sponsor";
+          div.appendChild(img);
+        }
+
+        const name = document.createElement("div");
+        name.className = "sponsor-card-name";
+        name.textContent = s.name || "Sponsor";
+        div.appendChild(name);
+
+        container.appendChild(div);
+      });
+    }
+
+    function toText(value) {
+      // Our JSON may contain Date objects serialized as strings
+      if (!value) return "";
+      return String(value);
+    }
+
+    document.addEventListener("DOMContentLoaded", loadGameData);
+  </script>
 </body>
 </html>
